@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 
 class ProductImage extends StatelessWidget {
-
   final String? imagenproducto;
 
   const ProductImage({super.key, this.imagenproducto});
@@ -17,19 +18,9 @@ class ProductImage extends StatelessWidget {
         child: Opacity(
           opacity: 0.8,
           child: ClipRRect(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(45), topRight: Radius.circular(45)),
-            child: this.imagenproducto == null 
-            ?Image(
-                image: AssetImage('assets/no-image.png'),
-                fit: BoxFit.cover
-                )
-            :         
-            FadeInImage(
-                placeholder: AssetImage('assets/jar-loading.gif'),
-                image: NetworkImage('https://via.placeholder.com/400x300/green'),
-                fit: BoxFit.cover),
-          ),
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(45), topRight: Radius.circular(45)),
+              child: getImage(imagenproducto)),
         ),
       ),
     );
@@ -45,4 +36,26 @@ class ProductImage extends StatelessWidget {
       ],
       borderRadius: BorderRadius.only(
           topLeft: Radius.circular(45), topRight: Radius.circular(45)));
+
+  Widget getImage(String? picture) {
+    if (picture == null || picture.isEmpty)
+      return Image(image: AssetImage('assets/no-image.png'), fit: BoxFit.cover);
+
+    if (picture.startsWith('http'))
+      return  FadeInImage(
+          placeholder: NetworkImage('http://10.0.2.2/tienda/img/jar-loading.gif'),
+          image: NetworkImage('http://10.0.2.2/tienda/img/imagen-example.png'),
+          fit: BoxFit.cover);
+
+    if (picture.startsWith('/data'))
+      return Image.file(
+          File(picture),
+          fit: BoxFit.cover,
+        );
+
+    return  FadeInImage(
+          placeholder: NetworkImage('http://10.0.2.2/tienda/img/jar-loading.gif'),
+          image: NetworkImage('http://10.0.2.2/tienda/'+picture),
+          fit: BoxFit.cover);
+  }
 }

@@ -1,10 +1,12 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tiendaapp/providers/product_form_provider.dart';
 import 'package:tiendaapp/services/services.dart';
 import 'package:tiendaapp/ui/input_decorations.dart';
 import 'package:tiendaapp/widgets/widgets.dart';
-
+import 'package:image_picker/image_picker.dart';
 class ProductScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -52,7 +54,18 @@ class _productScreenBody extends StatelessWidget {
                     top: 60,
                     right: 20,
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                              final ImagePicker _picker = ImagePicker();
+                              final PickedFile? pickedFile = await _picker.getImage(source: ImageSource.camera, imageQuality: 100);
+
+                              if(pickedFile == null){
+                                return;
+
+                              }
+
+                              print('Imagen tomada ${pickedFile.path}');
+                              productService.ActualizarImagenSeleccionada(pickedFile.path);
+                      },
                       icon: Icon(
                         Icons.camera_alt_rounded,
                         size: 40,
@@ -67,9 +80,17 @@ class _productScreenBody extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.save_outlined),
-        onPressed: ()async {
+        child: productService.isSaving 
+        ? CircularProgressIndicator():Icon(Icons.save_outlined),
+        onPressed: 
+        productService.isSaving 
+        ? null :
+        ()async {
           if(!productForm.isValidForm()) return;
+
+          final String? imagenUrl = await productService.SubirImagen();
+
+          if( imagenUrl != null) productForm.product.imagen = imagenUrl;
 
           await productService.saveOrCreateProduct(productForm.product);
         },
@@ -112,21 +133,6 @@ class _ProductForm extends StatelessWidget {
               height: 10,
             ),
             TextFormField(
-              initialValue: product.descripcion,
-              onChanged:(value) => product.descripcion = value ,
-              validator: ((value) {
-                if(value==null || value.length < 1)
-                return 'El nombre es obligatorio';
-              }),
-              decoration: InputDecorations.authInputDecoration(
-                hintText: 'Nombre del producto',
-                labelText: 'Nombre',
-              ),
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            TextFormField(
               initialValue: product.codigo,
               onChanged:(value) => product.codigo = value ,
               validator: ((value) {
@@ -142,6 +148,45 @@ class _ProductForm extends StatelessWidget {
             SizedBox(
               height: 30,
             ),
+            
+            TextFormField(
+              initialValue: product.descripcion,
+              onChanged:(value) => product.descripcion = value ,
+              validator: ((value) {
+                if(value==null || value.length < 1)
+                return 'El nombre es obligatorio';
+              }),
+              decoration: InputDecorations.authInputDecoration(
+                hintText: 'Nombre del producto',
+                labelText: 'Nombre',
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              initialValue: product.precioVenta.toString(),
+              decoration: InputDecorations.authInputDecoration(
+                hintText: 'Precio venta',
+                labelText: 'Precio',
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              initialValue: product.stock.toString(),
+              decoration: InputDecorations.authInputDecoration(
+                hintText: 'Stock',
+                labelText: 'Stock',
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+
           ],
         )),
       ),

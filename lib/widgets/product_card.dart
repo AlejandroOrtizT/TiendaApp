@@ -146,12 +146,12 @@ class _backgroundImage extends StatelessWidget {
         height: 400,
         child: url == null 
         ? Image(
-            image: AssetImage('assets/no-image.png'),
+            image: NetworkImage('http://10.0.2.2/tienda/img/no-image.png'),
             fit: BoxFit.cover,
             )
         : FadeInImage(
-          placeholder: AssetImage('assets/jar-loading.gif'),
-          image: NetworkImage('https://via.placeholder.com/400x300/f6f6f6'),
+          placeholder: NetworkImage('http://10.0.2.2/tienda/img/jar-loading.gif'),
+          image: NetworkImage('http://10.0.2.2/tienda/' + url!),
           fit: BoxFit.cover,
         ),
       ),
